@@ -7,18 +7,18 @@ import dayjs, { Dayjs } from 'dayjs';
 import calendar from '../assets/Calendar.png';
 import numResults from '../assets/NumResults.png';
 
+interface SearchBarProps {
+    handleSearch: Function;
+}
+
 interface SearchBarState {
     calAnchor: HTMLButtonElement|null;
-    date: Dayjs|null;
+    date: Dayjs;
     numAnchor: HTMLButtonElement|null;
     numResults: number;
 }
 
-class SearchBar extends React.Component<{}, SearchBarState> {
-
-    onSearch(date: Date, numResults: number) {
-        console.log(date, numResults);
-    }
+class SearchBar extends React.Component<SearchBarProps, SearchBarState> {
 
     handleCalendarClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         this.setState({calAnchor: event.currentTarget});
@@ -79,7 +79,11 @@ class SearchBar extends React.Component<{}, SearchBarState> {
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DateCalendar
                             defaultValue={this.state.date}
-                            onChange={(newValue) => {this.setState({date: newValue, calAnchor: null})}}
+                            onChange={(newValue) => {
+                                if (newValue) {
+                                    this.setState({date: newValue, calAnchor: null})
+                                }
+                            }}
                         />                    
                     </LocalizationProvider>
                 </Popover>
@@ -128,6 +132,7 @@ class SearchBar extends React.Component<{}, SearchBarState> {
                     variant="contained"
                     color="primary"
                     style={{ borderRadius: '50px', fontSize: '14px', padding: '10px 64px', margin: '12px' }}
+                    onClick={() => this.props.handleSearch(this.state.date, this.state.numResults)}
                 >
                     Search
                 </Button>

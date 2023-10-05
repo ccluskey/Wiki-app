@@ -2,30 +2,54 @@ import React from 'react';
 import { Box, Container, List, ListItem, Pagination, Typography } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import SearchBar from './components/SearchBar';
+import fetchWikiData from './fetchWikiData';
+import dayjs, { Dayjs } from 'dayjs';
+
+interface ArticleData {
+    articleName: string,
+    views: number
+}
 
 interface WikiAppState {
-    articleData: Array<any>,
-    curPage: number
+    articleData: ArticleData[],
+    curPage: number,
+    date: Dayjs,
+    numResults: number
+    isError: boolean
 }
 
 class WikiApp extends React.Component<{}, WikiAppState> {    
     constructor(props: any) {
         super(props)
-        this.state = { articleData: [
-            {articleName: "AI", views: 100000},
-            {articleName: "Machine Learning", views: 90000},
-            {articleName: "Deep Learning", views: 80000},
-            {articleName: "Artificial Intelligence", views: 70000},
-            {articleName: "Neural Networks", views: 70000},
-            {articleName: "Artificial Intelligence", views: 60000},
-            {articleName: "Machine Learning", views: 50000},
-            {articleName: "Deep Learning", views: 40000},
-            {articleName: "Artificial Intelligence", views: 30000},
-            {articleName: "Neural Networks", views: 20000},
-            {articleName: "Artificial Intelligence", views: 10000},
-            {articleName: "Machine Last Item", views: 5000},
-        ],
-        curPage: 1 };
+        this.state = { articleData: [], curPage: 1, date: dayjs("2023-01-01"), numResults: 100, isError: false  };
+    }
+
+    componentDidMount() {
+        // Try to fetch the data if we don't have any and there wasn't an error
+        if (this.state.articleData.length == 0 && this.state.isError == false) {
+            this.fetchWikiData(this.state.date, this.state.numResults);
+        }
+        
+    }
+        
+    fetchWikiData = (date: Dayjs, numResults: number) => {
+        fetchWikiData(date.format("YYYY"), date.format("MM"), date.format("DD")).then(response => {
+            let articleDataForDate = [];
+            if (response.status == 200 && response.data && response.data.items && response.data.items.length > 0
+                && response.data.items[0].articles && response.data.items[0].articles.length > 0) {
+                // The app only ever shows up to 200 articles, but the API returns 1000 (not configurable)
+                for (let i = 0; i < 200; i++) {
+                    articleDataForDate.push({
+                        articleName: response.data.items[0].articles[i].article.replaceAll("_", " "),
+                        views: response.data.items[0].articles[i].views.toLocaleString()
+                    });
+                }
+            
+                this.setState({articleData: articleDataForDate, numResults: numResults, date: date});
+            } else {
+                this.setState({isError: true});
+            }
+        });
     }
 
     render() {
@@ -51,7 +75,7 @@ class WikiApp extends React.Component<{}, WikiAppState> {
                     <Typography variant="h4" style={{ fontFamily: 'Georgia, serif', color: 'black' }}>
                         Top Wikipedia articles
                     </Typography>
-                    <SearchBar></SearchBar>
+                    <SearchBar handleSearch={this.fetchWikiData}></SearchBar>
                     <Box sx={{
                         display: 'flex',
                         justifyContent: 'center',
@@ -64,7 +88,7 @@ class WikiApp extends React.Component<{}, WikiAppState> {
                             padding: '2%',
                             width: '100%'
                         }}>
-                            {this.state.articleData.slice(this.state.curPage * 10 - 10, this.state.curPage * 10).map((value, index) => (
+                            {this.state.articleData.slice(this.state.curPage * 10 - 10, Math.min(this.state.numResults, this.state.curPage * 10)).map((value, index) => (
                                 <ListItem disableGutters>
                                     <Box
                                         display="flex"
@@ -93,7 +117,7 @@ class WikiApp extends React.Component<{}, WikiAppState> {
 
                         <Pagination
                             onChange={(e, page) => this.setState({ curPage: page })}
-                            count={Math.ceil(this.state.articleData.length / 10)}
+                            count={Math.ceil(this.state.numResults / 10)}
                             size="small"
                         />
                     </Box>
