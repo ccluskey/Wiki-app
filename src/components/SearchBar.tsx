@@ -4,13 +4,15 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs, { Dayjs } from 'dayjs';
-import calendar from '../assets/Calendar.png';
-import numResults from '../assets/NumResults.png';
+import calendarImg from '../assets/Calendar.png';
+import numResultsImg from '../assets/NumResults.png';
+import countryImg from '../assets/Country.png';
 
 interface SearchBarProps {
     handleSearch: Function;
     defaultDate: Dayjs;
     defaultResults: number;
+    defaultCountry: string;
 }
 
 interface SearchBarState {
@@ -18,6 +20,8 @@ interface SearchBarState {
     date: Dayjs;
     numAnchor: HTMLButtonElement|null;
     numResults: number;
+    countryAnchor: HTMLButtonElement|null;
+    country: string;
 }
 
 class SearchBar extends React.Component<SearchBarProps, SearchBarState> {
@@ -30,9 +34,20 @@ class SearchBar extends React.Component<SearchBarProps, SearchBarState> {
         this.setState({numAnchor: event.currentTarget});
     }
 
+    handleCountryClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        this.setState({countryAnchor: event.currentTarget});
+    }
+
     constructor(props: any) {
         super(props)
-        this.state = {calAnchor: null,  date: this.props.defaultDate, numAnchor: null, numResults: this.props.defaultResults};
+        this.state = {
+            calAnchor: null,
+            date: this.props.defaultDate,
+            numAnchor: null,
+            numResults: this.props.defaultResults,
+            country: this.props.defaultCountry,
+            countryAnchor: null
+        };
     }
 
     render() {
@@ -52,7 +67,7 @@ class SearchBar extends React.Component<SearchBarProps, SearchBarState> {
                     onClick={this.handleCalendarClick}
                     style={{ borderRadius: '50px', margin: '10px'}}
                 >
-                    <img id={"calOpen"} src={calendar} width={40} height={40} style={{ padding: '18px'}}alt="calendar image"/>
+                    <img src={calendarImg} width={40} height={40} style={{ padding: '18px'}}alt="calendar image"/>
                     <Box sx={{
                         flexDirection: 'column',
                         justifyContent: 'flex-start'
@@ -97,7 +112,7 @@ class SearchBar extends React.Component<SearchBarProps, SearchBarState> {
                     onClick={this.handleNumClick}
                     style={{ borderRadius: '50px', margin: '10px'}}
                 >
-                    <img src={numResults} width={40} height={40} style={{ padding: '18px'}}alt="number of results image"/>
+                    <img src={numResultsImg} width={40} height={40} style={{ padding: '18px'}} alt="number of results image"/>
                     <Box sx={{
                         flexDirection: 'column',
                         justifyContent: 'flex-start'
@@ -130,11 +145,58 @@ class SearchBar extends React.Component<SearchBarProps, SearchBarState> {
                     </Box>
                 </Menu>
 
+                <Divider orientation="vertical" flexItem style={{ margin: '24px 0', borderRightWidth: '.5px' }} />
+
+                <Button 
+                    color={'secondary'}
+                    onClick={this.handleCountryClick}
+                    style={{ borderRadius: '50px', margin: '10px'}}
+                >
+                    <img src={countryImg} width={40} height={40} style={{ padding: '18px'}} alt="country image"/>
+                    <Box sx={{
+                        flexDirection: 'column',
+                        justifyContent: 'flex-start'
+                    }}>
+                        <Typography fontSize={10}  sx={{ display: 'flex'}}>
+                            {Boolean(this.state.numAnchor) ? "COUNTRY ˄" : "COUNTRY ˅"}
+                        </Typography>
+                        <Typography fontSize={14} sx={{display: 'flex'}} color="black">
+                            {this.state.country}
+                        </Typography>
+                    </Box>
+                </Button>
+                <Menu
+                    open={Boolean(this.state.countryAnchor)}
+                    onClose={() => this.setState({countryAnchor: null })}
+                    anchorEl={this.state.countryAnchor}
+                >
+                    <Box sx={{
+                        width: '200px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        borderRadius: '100px'
+                    }}
+                    >
+                        <MenuItem sx={{justifyContent: 'center'}} onClick={() => this.setState({country: 'US', countryAnchor: null})}>US</MenuItem>
+                        <MenuItem sx={{justifyContent: 'center'}} onClick={() => this.setState({country: 'FR', countryAnchor: null})}>FR</MenuItem>
+                        <MenuItem sx={{justifyContent: 'center'}} onClick={() => this.setState({country: 'JP', countryAnchor: null})}>JP</MenuItem>
+                        <MenuItem sx={{justifyContent: 'center'}} onClick={() => this.setState({country: 'DE', countryAnchor: null})}>DE</MenuItem>
+                        <MenuItem sx={{justifyContent: 'center'}} onClick={() => this.setState({country: 'ES', countryAnchor: null})}>ES</MenuItem>
+                        <MenuItem sx={{justifyContent: 'center'}} onClick={() => this.setState({country: 'IT', countryAnchor: null})}>IT</MenuItem>
+                        <MenuItem sx={{justifyContent: 'center'}} onClick={() => this.setState({country: 'PT', countryAnchor: null})}>PT</MenuItem>
+                        <MenuItem sx={{justifyContent: 'center'}} onClick={() => this.setState({country: 'AR', countryAnchor: null})}>AR</MenuItem>
+                        <MenuItem sx={{justifyContent: 'center'}} onClick={() => this.setState({country: 'NL', countryAnchor: null})}>NL</MenuItem>
+                        <MenuItem sx={{justifyContent: 'center'}} onClick={() => this.setState({country: 'PL', countryAnchor: null})}>PL</MenuItem>
+                        <MenuItem sx={{justifyContent: 'center'}} onClick={() => this.setState({country: 'SE', countryAnchor: null})}>SE</MenuItem>
+                        <MenuItem sx={{justifyContent: 'center'}} onClick={() => this.setState({country: 'KR', countryAnchor: null})}>KR</MenuItem>
+                    </Box>
+                </Menu>
+
                 <Button
                     variant="contained"
                     color="primary"
                     style={{ borderRadius: '50px', fontSize: '14px', padding: '10px 64px', margin: '12px' }}
-                    onClick={() => this.props.handleSearch(this.state.date, this.state.numResults)}
+                    onClick={() => this.props.handleSearch(this.state.date, this.state.numResults, this.state.country)}
                 >
                     Search
                 </Button>
