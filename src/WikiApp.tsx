@@ -14,8 +14,9 @@ interface WikiAppState {
     articleData: ArticleData[],
     curPage: number,
     date: Dayjs,
-    numResults: number
-    isError: boolean
+    numResults: number,
+    isError: boolean,
+    errorMessage?: string
 }
 
 class WikiApp extends React.Component<{}, WikiAppState> {    
@@ -49,7 +50,52 @@ class WikiApp extends React.Component<{}, WikiAppState> {
             } else {
                 this.setState({isError: true});
             }
+        }).catch(error => {
+            if (error.message == "Network Error") {
+                 this.setState({articleData: [], isError: true, errorMessage: "Could not fetch article data, please check your network connection and try again"});
+            } else if (error.response && error.response.data.title == "Not found.") {
+                 this.setState({articleData: [], isError: true, errorMessage: "No data for the selected date, please chose another date"});
+            } else {
+            	this.setState({articleData: [], isError: true, errorMessage: "An unknown error occured, please try again later"});
+            }
         });
+    }
+
+    renderListView() {
+        return (
+            <List sx={{
+                bgcolor: 'white',
+                borderRadius: '.5em',
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                margin: '0 15%',
+                padding: '2%',
+                width: '100%'
+            }}>
+                {this.state.articleData.slice(this.state.curPage * 10 - 10, Math.min(this.state.numResults, this.state.curPage * 10)).map((value, index) => (
+                    <ListItem disableGutters>
+                        <Box
+                            display="flex"
+                            justifyContent="stretch"
+                            alignItems="center"
+                            style={{ padding: '12px' }}
+                            width="100%"
+                            sx={{ border: 1, borderColor: '#e6eaeb', borderRadius: '.5em'}}
+                            onClick={() => { }}
+                        >
+                            <Typography style={{ fontFamily: 'Georgia, serif', color: '#73767f', fontSize: '12px', width: '2em' }}>{this.state.curPage * 10 - 10 + index + 1}</Typography>
+                            <Typography style={{ fontFamily: 'Georgia, serif', color: 'black', fontSize: '12px' }}>{value.articleName}</Typography>
+                            <Typography style={{ marginLeft: 'auto', fontFamily: 'sans-serif', color: '#73767f', fontSize: '10px' }}>{value.views} views</Typography>
+                        </Box>
+                    </ListItem>
+                ))}
+            </List>
+        )
+    }
+
+    renderErrorView() {
+        return(
+            <Typography style={{ fontFamily: 'Georgia, serif', fontSize: '12px' }}>{this.state.errorMessage}</Typography>
+        )
     }
 
     render() {
@@ -69,6 +115,14 @@ class WikiApp extends React.Component<{}, WikiAppState> {
               }
         });
 
+	let listView;
+        if (this.state.isError) {
+           listView = this.renderErrorView();
+        } else {
+           listView = this.renderListView();
+        }
+            
+
         return (
             <ThemeProvider theme={theme}>
                 <Container style={{ textAlign: 'center', backgroundColor: '#f5f7f7', padding: '16px' }}>
@@ -80,32 +134,8 @@ class WikiApp extends React.Component<{}, WikiAppState> {
                         display: 'flex',
                         justifyContent: 'center',
                     }}>
-                        <List sx={{
-                            bgcolor: 'white',
-                            borderRadius: '.5em',
-                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                            margin: '0 15%',
-                            padding: '2%',
-                            width: '100%'
-                        }}>
-                            {this.state.articleData.slice(this.state.curPage * 10 - 10, Math.min(this.state.numResults, this.state.curPage * 10)).map((value, index) => (
-                                <ListItem disableGutters>
-                                    <Box
-                                        display="flex"
-                                        justifyContent="stretch"
-                                        alignItems="center"
-                                        style={{ padding: '12px' }}
-                                        width="100%"
-                                        sx={{ border: 1, borderColor: '#e6eaeb', borderRadius: '.5em'}}
-                                        onClick={() => { }}
-                                    >
-                                        <Typography style={{ fontFamily: 'Georgia, serif', color: '#73767f', fontSize: '12px', width: '2em' }}>{this.state.curPage * 10 - 10 + index + 1}</Typography>
-                                        <Typography style={{ fontFamily: 'Georgia, serif', color: 'black', fontSize: '12px' }}>{value.articleName}</Typography>
-                                        <Typography style={{ marginLeft: 'auto', fontFamily: 'sans-serif', color: '#73767f', fontSize: '10px' }}>{value.views} views</Typography>
-                                    </Box>
-                                </ListItem>
-                            ))}
-                        </List>
+                        {listView}
+                        
                     </Box>
 
                     <Box
@@ -117,7 +147,7 @@ class WikiApp extends React.Component<{}, WikiAppState> {
 
                         <Pagination
                             onChange={(e, page) => this.setState({ curPage: page })}
-                            count={Math.ceil(this.state.numResults / 10)}
+                            count={this.state.isError ? 0 : Math.ceil(this.state.numResults / 10)}
                             size="small"
                         />
                     </Box>
