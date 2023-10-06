@@ -9,6 +9,8 @@ import numResults from '../assets/NumResults.png';
 
 interface SearchBarProps {
     handleSearch: Function;
+    defaultDate: Dayjs;
+    defaultResults: number;
 }
 
 interface SearchBarState {
@@ -30,7 +32,7 @@ class SearchBar extends React.Component<SearchBarProps, SearchBarState> {
 
     constructor(props: any) {
         super(props)
-        this.state = {calAnchor: null,  date: dayjs('2023-01-01'), numAnchor: null, numResults: 100};
+        this.state = {calAnchor: null,  date: this.props.defaultDate, numAnchor: null, numResults: this.props.defaultResults};
     }
 
     render() {

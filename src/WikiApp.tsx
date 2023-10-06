@@ -6,23 +6,23 @@ import fetchWikiData from './fetchWikiData';
 import dayjs, { Dayjs } from 'dayjs';
 
 interface ArticleData {
-    articleName: string,
-    views: number
+    articleName: string;
+    views: number;
 }
 
 interface WikiAppState {
-    articleData: ArticleData[],
-    curPage: number,
-    date: Dayjs,
-    numResults: number,
-    isError: boolean,
-    errorMessage?: string
+    articleData: ArticleData[];
+    curPage: number;
+    date: Dayjs;
+    numResults: number;
+    isError: boolean;
+    errorMessage?: string;
 }
 
 class WikiApp extends React.Component<{}, WikiAppState> {    
     constructor(props: any) {
         super(props)
-        this.state = { articleData: [], curPage: 1, date: dayjs("2023-01-01"), numResults: 100, isError: false  };
+        this.state = { articleData: [], curPage: 1, date: dayjs().add(-1, 'day'), numResults: 100, isError: false  };
     }
 
     componentDidMount() {
@@ -129,7 +129,11 @@ class WikiApp extends React.Component<{}, WikiAppState> {
                     <Typography variant="h4" style={{ fontFamily: 'Georgia, serif', color: 'black' }}>
                         Top Wikipedia articles
                     </Typography>
-                    <SearchBar handleSearch={this.fetchWikiData}></SearchBar>
+                    <SearchBar
+                        handleSearch={this.fetchWikiData}
+                        defaultDate={this.state.date}
+                        defaultResults={this.state.numResults}
+                    />
                     <Box sx={{
                         display: 'flex',
                         justifyContent: 'center',
