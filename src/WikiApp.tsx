@@ -154,6 +154,7 @@ class WikiApp extends React.Component<{}, WikiAppState> {
                         <Pagination
                             onChange={(e, page) => this.setState({ curPage: page })}
                             count={this.state.isError ? 0 : Math.min(Math.ceil(this.state.numResults / 10), Math.ceil(this.state.articleData.length / 10))}
+                            page={this.state.curPage}
                             size="small"
                         />
                     </Box>
