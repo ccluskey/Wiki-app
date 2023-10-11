@@ -67,7 +67,7 @@ class SearchBar extends React.Component<SearchBarProps, SearchBarState> {
                     onClick={this.handleCalendarClick}
                     style={{ borderRadius: '50px', margin: '10px'}}
                 >
-                    <img src={calendarImg} width={40} height={40} style={{ padding: '18px'}}alt="calendar image"/>
+                    <img src={calendarImg} width={40} height={40} style={{ padding: '18px'}} alt="calendar image"/>
                     <Box sx={{
                         flexDirection: 'column',
                         justifyContent: 'flex-start'

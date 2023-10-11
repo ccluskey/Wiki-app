@@ -116,13 +116,12 @@ class WikiApp extends React.Component<{}, WikiAppState> {
               }
         });
 
-	let listView;
+	    let listView;
         if (this.state.isError) {
            listView = this.renderErrorView();
         } else {
            listView = this.renderListView();
         }
-            
 
         return (
             <ThemeProvider theme={theme}>
